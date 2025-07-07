@@ -1,21 +1,17 @@
-// Inject Chat Exporter into the active tab using chrome.scripting (MV3)
-
 function injectChatExporter() {
-  // Updated Chat Exporter UI Script
-  // Features: draggable UI, animated background, prettier selection, hidden scrollbar
   (async function () {
+    const selectedChats = new Set();
 
-    const chats = [...document.querySelectorAll('h4')]
-      .map(h4 => {
-        const title = h4.innerText.trim();
-        const messages = [];
-        let next = h4.nextElementSibling;
-        while (next && next.tagName === 'PRE') {
-          messages.push(next.innerText.trim());
-          next = next.nextElementSibling;
-        }
-        return { title, messages };
-      });
+    const chats = [...document.querySelectorAll('h4')].map(h4 => {
+      const title = h4.innerText.trim();
+      const messages = [];
+      let next = h4.nextElementSibling;
+      while (next && next.tagName === 'PRE') {
+        messages.push(next.innerText.trim());
+        next = next.nextElementSibling;
+      }
+      return { title, messages };
+    });
 
     if (!chats.length) return alert("❌ No conversations found!");
 
@@ -23,30 +19,43 @@ function injectChatExporter() {
       #exporterPanel {
         position: fixed; top: 20px; left: 20px; z-index: 999999;
         width: 340px; max-height: 90vh; overflow-y: auto;
-        background: radial-gradient(circle, #1b1b1b 0%, #111 100%);
-        color: white; font-family: monospace, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        background: #111; color: white;
+        font-family: monospace;
         border: 2px solid #333; border-radius: 12px; padding: 15px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.8); animation: fadeIn 0.6s ease-in;
+        box-shadow: 0 0 30px rgba(0,0,0,0.8); animation: fadeIn 0.5s ease-in;
         cursor: grab;
       }
       #exporterPanel::-webkit-scrollbar { width: 0px; background: transparent; }
       #exporterPanel input[type="text"] {
         width: 100%; margin-bottom: 12px; padding: 6px;
-        background: #1e1e1e; color: white; border: 1px solid #555; border-radius: 5px;
+        background: #222; color: white; border: 1px solid #444; border-radius: 5px;
       }
       .chatRow {
-        margin: 5px 0; padding: 6px 10px; border-radius: 6px;
+        margin: 6px 0; padding: 6px 10px; border-radius: 6px;
         background: #222; transition: background 0.3s ease;
         display: flex; align-items: center; justify-content: space-between;
       }
-      .chatRow:hover { background: #333; }
-      .chatRow.selected { background: #444 !important; border-left: 4px solid lime; }
+      .chatRow:hover { background: #2c2c2c; }
+      .chatRow.selected {
+        background: #333 !important;
+        border-left: 4px solid limegreen;
+      }
       .chatRow input { display: none; }
-      .chatTitle { flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
+      .chatTitle {
+        flex-grow: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
       #exportButton {
         margin-top: 12px; width: 100%; padding: 10px;
-        background: limegreen; color: black; font-weight: bold;
-        border: none; border-radius: 6px; cursor: pointer;
+        background: limegreen; color: black;
+        font-weight: bold; border: none; border-radius: 6px;
+        cursor: pointer; transition: background 0.2s ease-in-out;
+      }
+      #exportButton:hover {
+        background: #90ee90;
       }
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
@@ -80,10 +89,12 @@ function injectChatExporter() {
         const safeTitle = chat.title.replace(/[\\/:*?"<>|]/g, '').slice(0, 40);
         row.innerHTML = `<label class="chatTitle" data-index="${i}">${safeTitle}</label><input type="checkbox" value="${i}">`;
 
+        const checkbox = row.querySelector('input');
+        if (checkbox.checked) row.classList.add('selected');
+
         row.querySelector('.chatTitle').onclick = () => {
-          row.classList.toggle('selected');
-          const checkbox = row.querySelector('input');
           checkbox.checked = !checkbox.checked;
+          row.classList.toggle('selected', checkbox.checked);
         };
 
         chatList.appendChild(row);
@@ -116,12 +127,13 @@ function injectChatExporter() {
       const blob = await zip.generateAsync({ type: "blob" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
-      link.download = `${timestamp}.zip`;
+      const now = new Date();
+      const timestamp = now.toISOString().replace(/[:T]/g, '-').split('.')[0];
+      link.download = `ChatExport_${timestamp}.zip`;
       link.click();
     };
 
-    // Make draggable
+    // Drag
     let offsetX, offsetY, isDragging = false;
     panel.addEventListener('mousedown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
@@ -142,7 +154,7 @@ function injectChatExporter() {
   })();
 }
 
-// When popup loads, inject exporter into the active tab
+// Load locally using Chrome Extension API (CSP-safe)
 window.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

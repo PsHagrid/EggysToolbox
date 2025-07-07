@@ -1,15 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Aiman Toolbox</title>
+  <meta charset="UTF-8">
+  <title>Chat Exporter</title>
   <style>
     body {
       margin: 0;
-      background: #111;
+      padding: 0;
+      background: transparent;
+      font-family: Arial, sans-serif;
+    }
+    #app {
+      width: 300px;
+      padding: 10px;
+      background-color: #111;
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    #app input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #222;
+      color: #fff;
+    }
+    .chatRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      margin-bottom: 4px;
+      background: #222;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .chatRow:hover {
+      background: #333;
+    }
+    .chatRow.selected {
+      border-left: 4px solid #4caf50;
+      background: #1b1b1b;
+    }
+    .chatTitle {
+      flex-grow: 1;
+      color: #fff;
+    }
+    .chatRow input[type="checkbox"] {
+      transform: scale(1.2);
+      accent-color: #4caf50;
+    }
+    #exportButton {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: #4caf50;
       color: white;
-      font-family: monospace, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
-      width: 340px;
-      padding: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #exportButton:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
