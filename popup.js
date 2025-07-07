@@ -48,11 +48,22 @@ function injectChatExporter() {
         text-overflow: ellipsis;
         cursor: pointer;
       }
+      #deselectButton {
+        margin-top: 8px; width: 100%; padding: 10px;
+        background: #555; color: white;
+        font-weight: bold; border: none; border-radius: 6px;
+        cursor: pointer; transition: background 0.2s ease-in-out;
+      }
+      #deselectButton:hover {
+        background: #666;
+      }
       #exportButton {
+        position: sticky; bottom: 0; left: 0;
         margin-top: 12px; width: 100%; padding: 10px;
         background: limegreen; color: black;
         font-weight: bold; border: none; border-radius: 6px;
         cursor: pointer; transition: background 0.2s ease-in-out;
+        z-index: 10;
       }
       #exportButton:hover {
         background: #90ee90;
@@ -73,6 +84,7 @@ function injectChatExporter() {
       <div style="font-size:16px; margin-bottom:10px;">📂 <b>Chat Exporter</b></div>
       <input type="text" placeholder="Search chats..." id="chatSearch">
       <div id="chatList"></div>
+      <button id="deselectButton">❌ Deselect All</button>
       <button id="exportButton">📦 Export Selected (.zip)</button>
     `;
     document.body.appendChild(panel);
@@ -90,11 +102,17 @@ function injectChatExporter() {
         row.innerHTML = `<label class="chatTitle" data-index="${i}">${safeTitle}</label><input type="checkbox" value="${i}">`;
 
         const checkbox = row.querySelector('input');
+        checkbox.checked = selectedChats.has(i);
         if (checkbox.checked) row.classList.add('selected');
 
         row.querySelector('.chatTitle').onclick = () => {
           checkbox.checked = !checkbox.checked;
           row.classList.toggle('selected', checkbox.checked);
+          if (checkbox.checked) {
+            selectedChats.add(i);
+          } else {
+            selectedChats.delete(i);
+          }
         };
 
         chatList.appendChild(row);
@@ -104,8 +122,16 @@ function injectChatExporter() {
     searchInput.addEventListener("input", () => renderChats(searchInput.value));
     renderChats();
 
+    document.querySelector('#deselectButton').onclick = () => {
+      selectedChats.clear();
+      [...chatList.querySelectorAll(".chatRow")].forEach(row => {
+        row.querySelector('input').checked = false;
+        row.classList.remove('selected');
+      });
+    };
+
     document.querySelector('#exportButton').onclick = async () => {
-      const selected = [...chatList.querySelectorAll("input:checked")].map(c => parseInt(c.value));
+      const selected = [...selectedChats];
       if (!selected.length) return alert("No chats selected!");
 
       const zip = new JSZip();
@@ -124,12 +150,12 @@ function injectChatExporter() {
         zip.file(`${finalName}.txt`, text);
       });
 
+      const now = new Date();
+      const formatted = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear().toString().slice(-2)} - ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
       const blob = await zip.generateAsync({ type: "blob" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      const now = new Date();
-      const timestamp = now.toISOString().replace(/[:T]/g, '-').split('.')[0];
-      link.download = `ChatExport_${timestamp}.zip`;
+      link.download = `${formatted}.zip`;
       link.click();
     };
 
@@ -154,7 +180,7 @@ function injectChatExporter() {
   })();
 }
 
-// Load locally using Chrome Extension API (CSP-safe)
+// Load locally using Chrome Extension API
 window.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
