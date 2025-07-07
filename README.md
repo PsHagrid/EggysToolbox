@@ -19,6 +19,6 @@ The exporter expects each conversation title to be an `<h4>` element with the me
 4. Click a title to select or deselect it, then press **Export Selected** to download a ZIP containing the chosen chats.
 
 ## Permissions and limitations
-- `manifest.json` lists an empty `permissions` array, so the extension does not request special Chrome permissions.
-- JSZip is loaded from `https://cdnjs.cloudflare.com`. If that CDN is blocked, exporting will not work.
+ - `manifest.json` lists an empty `permissions` array, so the extension does not request special Chrome permissions.
+ - JSZip is bundled with the extension and loaded locally so exporting works offline.
 - The exporter only works with pages that use `<h4>` and `<pre>` tags for chat logs; other layouts are unsupported.
