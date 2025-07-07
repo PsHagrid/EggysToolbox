@@ -4,10 +4,6 @@ function injectChatExporter() {
   // Updated Chat Exporter UI Script
   // Features: draggable UI, animated background, prettier selection, hidden scrollbar
   (async function () {
-    const zipScript = document.createElement("script");
-    zipScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-    document.body.appendChild(zipScript);
-    await new Promise(res => zipScript.onload = res);
 
     const chats = [...document.querySelectorAll('h4')]
       .map(h4 => {
@@ -147,13 +143,22 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
     chrome.scripting.executeScript(
-      { target: { tabId: tab.id }, func: injectChatExporter },
+      { target: { tabId: tab.id }, files: ["jszip.min.js"] },
       () => {
         if (chrome.runtime.lastError) {
           app.textContent = 'Error: ' + chrome.runtime.lastError.message;
-        } else {
-          window.close();
+          return;
         }
+        chrome.scripting.executeScript(
+          { target: { tabId: tab.id }, func: injectChatExporter },
+          () => {
+            if (chrome.runtime.lastError) {
+              app.textContent = 'Error: ' + chrome.runtime.lastError.message;
+            } else {
+              window.close();
+            }
+          }
+        );
       }
     );
   });

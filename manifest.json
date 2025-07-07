@@ -15,6 +15,10 @@
     "activeTab",
     "scripting"
   ],
+  "web_accessible_resources": [{
+    "resources": ["jszip.min.js"],
+    "matches": ["<all_urls>"]
+  }],
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
