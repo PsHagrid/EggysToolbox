@@ -104,7 +104,7 @@
       const chat = chats[i];
       const safeTitle = chat.title.replace(/[\\/:*?"<>|]/g, '').slice(0, 40);
       const text = `${chat.title}\n\n${chat.messages.join('\n\n')}`;
-      zip.file(`${safeTitle || "Untitled"}.txt`, text);
+      zip.file(`${safeTitle || "Untitled"}_${i}.txt`, text);
     });
 
     const blob = await zip.generateAsync({ type: "blob" });
