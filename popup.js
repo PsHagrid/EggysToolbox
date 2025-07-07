@@ -24,7 +24,7 @@ function injectChatExporter() {
         position: fixed; top: 20px; left: 20px; z-index: 999999;
         width: 340px; max-height: 90vh; overflow-y: auto;
         background: radial-gradient(circle, #1b1b1b 0%, #111 100%);
-        color: white; font-family: monospace;
+        color: white; font-family: monospace, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
         border: 2px solid #333; border-radius: 12px; padding: 15px;
         box-shadow: 0 0 30px rgba(0,0,0,0.8); animation: fadeIn 0.6s ease-in;
         cursor: grab;
@@ -98,17 +98,26 @@ function injectChatExporter() {
       if (!selected.length) return alert("No chats selected!");
 
       const zip = new JSZip();
+      const usedNames = {};
       selected.forEach(i => {
         const chat = chats[i];
-        const safeTitle = chat.title.replace(/[\\/:*?"<>|]/g, '').slice(0, 40);
+        let safeTitle = chat.title.replace(/[\\/:*?"<>|]/g, '').slice(0, 40) || "Untitled";
+        let finalName = safeTitle;
+        let counter = 1;
+        while (usedNames[finalName]) {
+          counter += 1;
+          finalName = `${safeTitle}_${counter}`;
+        }
+        usedNames[finalName] = true;
         const text = `${chat.title}\n\n${chat.messages.join('\n\n')}`;
-        zip.file(`${safeTitle || "Untitled"}.txt`, text);
+        zip.file(`${finalName}.txt`, text);
       });
 
       const blob = await zip.generateAsync({ type: "blob" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Selected_Conversations.zip";
+      const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
+      link.download = `${timestamp}.zip`;
       link.click();
     };
 

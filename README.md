@@ -1,6 +1,6 @@
 # Eggys Toolbox
 
-Aiman Toolbox is a minimal Chrome extension that adds a "Chat Exporter" panel to pages displaying chats. The exporter lets you select multiple conversations and download them as a ZIP archive of text files.
+Aiman Toolbox is a minimal Chrome extension that adds a "Chat Exporter" panel to pages displaying chats. The exporter lets you select multiple conversations and download them as a ZIP archive of text files. The ZIP filename uses the current date and time and each chat is stored with a unique filename to avoid overwriting.
 
 ## Loading the extension
 1. Download or clone this repository.
