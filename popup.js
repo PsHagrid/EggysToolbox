@@ -2,10 +2,6 @@
 // Features: draggable UI, animated background, prettier selection, hidden scrollbar
 
 (async function () {
-  const zipScript = document.createElement("script");
-  zipScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-  document.body.appendChild(zipScript);
-  await new Promise(res => zipScript.onload = res);
 
   const chats = [...document.querySelectorAll('h4')]
     .map(h4 => {
